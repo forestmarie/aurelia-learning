@@ -1,14 +1,3 @@
-// export class App {
-//   configureRouter(config, router) {
-//     config.title = 'Aurelia Notes';
-//     config.map([
-//       { route: '', moduleId: 'welcome' },
-//       { route: 'settings', moduleId: 'settings/index', title: 'Settings' }
-//     ]);
-//
-//     this.router = router;
-//   }
-// }
 import {activationStrategy} from 'aurelia-router';
 
 export class App {
