@@ -1,0 +1,11 @@
+<template>
+  <div class="main-nav">
+    <ul class="nav nav-list">
+      <li repeat.for="route of router.navigation" class="${route.isActive ? 'active' : ''}">
+        <a href.bind="route.href" title.bind="route.title">
+          <i class="fa ${route.settings.iconClass}"></i>
+        </a>
+      </li>
+    </ul>
+  </div>
+</template>

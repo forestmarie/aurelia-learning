@@ -1,0 +1,17 @@
+<template>
+  <ai-dialog>
+    <ai-dialog-header>title goes here...</ai-dialog-header>
+
+    <ai-dialog-body>
+      <p>message goes here...</p>
+      <form> <!--On submit, ok the dialog w/ the answer response.-->
+        <input type="text" class="form-control" attach-focus="true"> <!--Bind the answer.-->
+      </form>
+    </ai-dialog-body>
+
+    <ai-dialog-footer>
+      <button>Cancel</button><!--Cancel the dialog.-->
+      <button>Ok</button>!<!--Ok the dialog w/ answer response; Disable the button if there's no answer.-->
+    </ai-dialog-footer>
+  </ai-dialog>
+</template>

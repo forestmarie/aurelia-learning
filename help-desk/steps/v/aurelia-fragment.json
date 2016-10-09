@@ -1,0 +1,5 @@
+{
+  "name": "chartjs",
+  "path": "../node_modules/chart.js/Chart.min",
+  "exports": "Chart"
+}

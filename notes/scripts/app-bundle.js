@@ -400,7 +400,7 @@ define('notes/index',['exports', 'backend/server', 'aurelia-event-aggregator', '
     }
 
     Notes.prototype.configureRouter = function configureRouter(config, router) {
-      config.map([{ route: '', moduleId: './no-selection' }, { route: 'new', moduleId: './detail', name: 'new' }, { route: 'edit/:noteId', name: 'edit', moduleId: './detail' }]);
+      config.map([{ route: '', moduleId: './no-selection' }, { route: 'new', name: 'new', moduleId: './detail' }, { route: 'edit/:noteId', name: 'edit', moduleId: './detail' }]);
 
       this.router = router;
     };

@@ -17,7 +17,7 @@ export class Notes {
   configureRouter(config, router){
     config.map([
       { route: '', moduleId: './no-selection' },
-      { route: 'new', moduleId: './detail', name: 'new' },
+      { route: 'new', name: 'new', moduleId: './detail' },
       { route: 'edit/:noteId', name:'edit', moduleId: './detail' }
     ]);
 
