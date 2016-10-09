@@ -57,16 +57,16 @@ export class Thread {
         this.from = this.getParticipant(this.ticket.fromId);
         return true;
       }
-      
-      return this.commonDialogs.prompt().then(response => {
+
+      return this.commonDialogs.prompt('What would you like to name the ticket?').then(response => {
         if (response.wasCancelled) {
           return false;
         }
-
+        
         return new RedirectToRoute('thread', { id: 'new', title:  response.output});
       });
     }
-    
+
     return this.server.getTicketDetails(parseInt(params.id)).then(ticket => {
       if (ticket) {
         this.ticket = ticket;
@@ -74,7 +74,7 @@ export class Thread {
         this.eventAggregator.publish(new TabOpened(ticket.title, 'thread', { id: ticket.id }));
         return true;
       }
-      
+
       return new RedirectToRoute('home');
     });
   }
