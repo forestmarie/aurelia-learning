@@ -47,6 +47,90 @@ define('main',['exports', './environment'], function (exports, _environment) {
     });
   }
 });
+define('login/login',['exports', 'aurelia-dependency-injection', 'aurelia-framework', 'backend/server'], function (exports, _aureliaDependencyInjection, _aureliaFramework, _server) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.Login = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _dec, _class;
+
+  var Login = exports.Login = (_dec = (0, _aureliaDependencyInjection.inject)(_aureliaFramework.Aurelia, _server.Server), _dec(_class = function () {
+    function Login(aurelia, server) {
+      _classCallCheck(this, Login);
+
+      this.aurelia = aurelia;
+      this.server = server;
+      this.username = 'un';
+      this.password = 'pw';
+      this.message = '';
+    }
+
+    Login.prototype.login = function login() {
+      var _this = this;
+
+      this.server.login(this.username, this.password).then(function (result) {
+        if (result) {
+          _this.message = 'Login Succeeded';
+
+          _this.aurelia.use.instance(_server.User, result);
+
+          _this.aurelia.setRoot('shell/shell');
+        } else {
+          _this.message = 'Incorrect Username or Password!';
+        }
+      });
+    };
+
+    return Login;
+  }()) || _class);
+});
+define('home/home',['exports', 'aurelia-framework', 'backend/server'], function (exports, _aureliaFramework, _server) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.Home = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _dec, _class;
+
+  var Home = exports.Home = (_dec = (0, _aureliaFramework.inject)(_server.Server), _dec(_class = function () {
+    function Home(server) {
+      _classCallCheck(this, Home);
+
+      this.server = server;
+      this.activity = null;
+      this.news = null;
+    }
+
+    Home.prototype.activate = function activate() {
+      var _this = this;
+
+      return Promise.all([this.server.getRecentActivity().then(function (activity) {
+        return _this.activity = activity;
+      }), this.server.getNews().then(function (news) {
+        return _this.news = news;
+      })]);
+    };
+
+    return Home;
+  }()) || _class);
+});
 define('backend/lorem',['exports'], function (exports) {
   'use strict';
 
@@ -429,90 +513,6 @@ define('backend/server',['exports', './lorem'], function (exports, _lorem) {
     return Server;
   }();
 });
-define('login/login',['exports', 'aurelia-dependency-injection', 'aurelia-framework', 'backend/server'], function (exports, _aureliaDependencyInjection, _aureliaFramework, _server) {
-  'use strict';
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.Login = undefined;
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var _dec, _class;
-
-  var Login = exports.Login = (_dec = (0, _aureliaDependencyInjection.inject)(_aureliaFramework.Aurelia, _server.Server), _dec(_class = function () {
-    function Login(aurelia, server) {
-      _classCallCheck(this, Login);
-
-      this.aurelia = aurelia;
-      this.server = server;
-      this.username = 'un';
-      this.password = 'pw';
-      this.message = '';
-    }
-
-    Login.prototype.login = function login() {
-      var _this = this;
-
-      this.server.login(this.username, this.password).then(function (result) {
-        if (result) {
-          _this.message = 'Login Succeeded';
-
-          _this.aurelia.use.instance(_server.User, result);
-
-          _this.aurelia.setRoot('shell/shell');
-        } else {
-          _this.message = 'Incorrect Username or Password!';
-        }
-      });
-    };
-
-    return Login;
-  }()) || _class);
-});
-define('home/home',['exports', 'aurelia-framework', 'backend/server'], function (exports, _aureliaFramework, _server) {
-  'use strict';
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.Home = undefined;
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var _dec, _class;
-
-  var Home = exports.Home = (_dec = (0, _aureliaFramework.inject)(_server.Server), _dec(_class = function () {
-    function Home(server) {
-      _classCallCheck(this, Home);
-
-      this.server = server;
-      this.activity = null;
-      this.news = null;
-    }
-
-    Home.prototype.activate = function activate() {
-      var _this = this;
-
-      return Promise.all([this.server.getRecentActivity().then(function (activity) {
-        return _this.activity = activity;
-      }), this.server.getNews().then(function (news) {
-        return _this.news = news;
-      })]);
-    };
-
-    return Home;
-  }()) || _class);
-});
 define('resources/index',['exports'], function (exports) {
   'use strict';
 
@@ -521,7 +521,7 @@ define('resources/index',['exports'], function (exports) {
   });
   exports.configure = configure;
   function configure(config) {
-    config.globalResources(['./value-converters/activity-type-to-route', './value-converters/date']);
+    config.globalResources(['./value-converters/activity-type-to-route', './value-converters/date', './elements/rich-text-editor', './elements/data-grid']);
   }
 });
 define('shell/routes',['exports'], function (exports) {
@@ -722,14 +722,14 @@ define('tickets/thread',['exports', 'aurelia-framework', 'aurelia-event-aggregat
 
     Thread.prototype.getParticipant = function getParticipant(id) {
       return this.ticket.participants.find(function (x) {
-        return x.id == id;
+        return x.id === id;
       });
     };
 
     Thread.prototype.save = function save() {
       var _this = this;
 
-      var isNew = this.ticket.id == 0;
+      var isNew = this.ticket.id === 0;
       this.server.saveTicket(this.ticket).then(function (ticket) {
         _this.ticket = ticket;
 
@@ -762,7 +762,7 @@ define('tickets/thread',['exports', 'aurelia-framework', 'aurelia-event-aggregat
     Thread.prototype.canActivate = function canActivate(params) {
       var _this2 = this;
 
-      if (params.id == 'new') {
+      if (params.id === 'new') {
         if (params.title) {
           this.ticket = this.server.createTicket(params.title);
           this.from = this.getParticipant(this.ticket.fromId);
@@ -778,7 +778,7 @@ define('tickets/thread',['exports', 'aurelia-framework', 'aurelia-event-aggregat
         });
       }
 
-      return this.server.getTicketDetails(parseInt(params.id)).then(function (ticket) {
+      return this.server.getTicketDetails(parseInt(params.id, 10)).then(function (ticket) {
         if (ticket) {
           _this2.ticket = ticket;
           _this2.from = _this2.getParticipant(ticket.fromId);
@@ -1777,14 +1777,547 @@ define('aurelia-dialog/dialog-service',['exports', 'aurelia-metadata', 'aurelia-
     return Promise.resolve(instruction);
   }
 });
-define('text!login/login.html', ['module'], function(module) { module.exports = "<template>\n  <div class=\"login\">\n    <div class=\"row\">\n      <div class=\"col-md-4 col-md-offset-4 logo\"></div>\n    </div>\n    <div class=\"row\">\n      <div class=\"col-md-4 col-md-offset-4 well\">\n        <div show.bind=\"message\" class=\"alert alert-danger\">${message}</div>\n\n        <form role=\"form\" submit.trigger=\"login()\" class=\"form-horizontal\">\n          <div class=\"form-group\">\n            <label class=\"col-sm-2 control-label\">Username</label>\n            <div class=\"col-sm-10\">\n              <input type=\"text\" value.bind=\"username\" class=\"form-control\" placeholder=\"username\"><!--Bind the username.-->\n            </div>\n          </div>\n          <div class=\"form-group\">\n            <label class=\"col-sm-2 control-label\">Password</label>\n            <div class=\"col-sm-10\">\n              <input type=\"password\" value.bind=\"password\" class=\"form-control\" placeholder=\"password\"><!--Bind the password.-->\n            </div>\n          </div>\n          <div class=\"form-group\">\n            <div class=\"col-sm-offset-2 col-sm-10 text-right\">\n              <!--Disable the button if there isn't both a username and password.-->\n              <button disabled.bind=\"!username || !password\" type=\"submit\" class=\"btn btn-success\">Log In</button>\n            </div>\n          </div>\n        </form>\n      </div>\n    </div>\n  </div>\n</template>\n"; });
-define('text!home/activity-list.html', ['module'], function(module) { module.exports = "<template bindable=\"activity\">\n  <ul>\n    <li repeat.for=\"a of activity\" class=\"activity\">\n      <a route-href=\"route.bind: a.type | activityTypeToRoute; params.bind: { id: a.associatedId }\">\n        <div class=\"well\">\n          <div class=\"avatar\">\n            <img src=\"${a.createdBy.iconUrl}\">\n          </div>\n          <div class=\"body\">\n            <div class=\"title\" innerhtml.bind=\"a.title\"></div>\n            <div class=\"content\">${a.content}</div>\n            <div class=\"date\">${a.createdAt | date}</div>\n          </div>\n        </div>\n      </a>\n    </li>\n  </ul>\n</template>\n"; });
-define('text!home/home.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./activity-list.html\"></require>\n  <require from=\"./news-list.html\"></require>\n\n  <div>\n    <div class=\"header\">\n      <div class=\"header-left\">Activity</div>\n      <div class=\"header-right\">Benchmarks &amp; News</div>\n    </div>\n\n    <div class=\"sidebar\">\n      <activity-list activity.bind=\"activity\"></activity-list>\n    </div>\n\n    <div class=\"detail-container\">\n      <div class=\"row1x2\">\n        <!--TODO: Add Charts Here-->\n      </div>\n      <div class=\"row2x2\">\n        <news-list news.bind=\"news\"></news-list>\n      </div>\n    </div>\n  </div>\n</template>\n"; });
-define('text!home/news-list.html', ['module'], function(module) { module.exports = "<template bindable=\"news\" class=\"news\">\n\n  <!--One of these for each item in the news array.-->\n  <template repeat.for=\"item of news\">\n    <h1>${item.title}</h1>\n    <p>${item.content}</p>\n    <div>\n      <span class=\"badge badge-success\">${item.createdAt | date}</span>\n      <div class=\"pull-right\">\n        <span repeat.for=\"tag of item.tags\" class=\"badge\">${tag}</span>\n      </div>\n    </div>\n    <hr>\n  </template>\n</template>\n"; });
-define('text!tickets/thread.html', ['module'], function(module) { module.exports = "<template>\n  This is a ticket ${ticket.id}.\n</template>\n"; });
-define('text!shell/header.html', ['module'], function(module) { module.exports = "<template>\n  <nav class=\"navbar navbar-default navbar-fixed-top\" role=\"navigation\">\n    <ul class=\"nav navbar-nav tabs\">\n\n      <li repeat.for=\"tab of tabs\" class=\"${tab.isActive ? 'active' : ''}\">\n        <a route-href=\"route.bind: tab.route; params.bind: tab.params\">${tab.title}</a>\n        <a href=\"#\" click.trigger=\"closeTab(tab)\">\n          <i class=\"fa fa-times\"></i>\n        </a>\n      </li>\n\n      <li class=\"dropdown add\">\n        <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">\n          <i class=\"fa fa-plus\"></i>add\n        </a>\n        <ul class=\"dropdown-menu\">\n          <li>\n            <a route-href=\"route: thread; params.bind: { id:'new' }\"><i class=\"icon-ticket\"></i> New Ticket</a>\n          </li>\n          <li>\n            <a route-href=\"route: user; params.bind: { id:'new' }\"><i class=\"icon-group\"></i> New User</a>\n          </li>\n        </ul>\n      </li>\n    </ul>\n\n    <ul class=\"nav navbar-nav navbar-right\">\n      <li class=\"dropdown\">\n        <a href=\"#\" class=\"avatar dropdown-toggle\" data-toggle=\"dropdown\">\n          <img src=\"${user.iconUrl}\" title.bind=\"user.username\">\n          <b class=\"caret\"></b>\n        </a>\n        <ul class=\"dropdown-menu\" role=\"menu\">\n          <li role=\"presentation\">\n            <a route-href=\"route: settings\"><i class=\"fa fa-cog\"></i> Settings</a>\n          </li>\n          <li role=\"presentation\">\n            <a route-href=\"route: help\"><i class=\"fa fa-envelope\"></i> Help</a>\n          </li>\n          <li role=\"presentation\" class=\"divider\"></li>\n          <li role=\"presentation\">\n            <a href=\"#\" click.trigger=\"logout()\"><i class=\"fa fa-power-off\"></i> Logout</a>\n          </li>\n        </ul>\n      </li>\n    </ul>\n  </nav>\n</template>\n"; });
-define('text!shell/shell.html', ['module'], function(module) { module.exports = "<template>\n  <compose view=\"./header.html\"></compose>\n  <compose view=\"./sidebar.html\"></compose>\n\n  <div class=\"page-host\">\n    <router-view></router-view>\n  </div>\n</template>\n"; });
-define('text!shell/sidebar.html', ['module'], function(module) { module.exports = "<template>\n  <div class=\"main-nav\">\n    <ul class=\"nav nav-list\">\n      <li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : ''}\">\n        <a href.bind=\"route.href\" title.bind=\"route.title\">\n          <i class=\"fa ${route.settings.iconClass}\"></i>\n        </a>\n      </li>\n    </ul>\n  </div>\n</template>\n"; });
-define('text!resources/dialogs/message-box.html', ['module'], function(module) { module.exports = "<template>\n  <ai-dialog style=\"max-width: 325px\">\n    <ai-dialog-header>${model.title}</ai-dialog-header>\n\n    <ai-dialog-body>\n      ${model.message}\n    </ai-dialog-body>\n\n    <ai-dialog-footer>\n      <button repeat.for=\"option of model.options\" click.trigger=\"selectOption(option)\">${option}</button>\n    </ai-dialog-footer>\n  </ai-dialog>\n</template>"; });
-define('text!resources/dialogs/prompt.html', ['module'], function(module) { module.exports = "<template>\n  <ai-dialog>\n    <ai-dialog-header>${model.title}</ai-dialog-header>\n\n    <ai-dialog-body>\n      <p>${model.message}</p>\n      <form submit.delegate=\"ok()\">\n        <input value.bind=\"answer\" type=\"text\" class=\"form-control\" attach-focus=\"true\">\n      </form>\n    </ai-dialog-body>\n\n    <ai-dialog-footer>\n      <button click.trigger=\"cancel()\">Cancel</button>\n      <button disabled.bind=\"!answer\" click.trigger=\"ok()\">Ok</button>\n    </ai-dialog-footer>\n  </ai-dialog>\n</template>\n"; });
+define('resources/elements/rich-text-editor',['exports', 'aurelia-framework'], function (exports, _aureliaFramework) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.RichTextEditor = undefined;
+
+  function _initDefineProp(target, property, descriptor, context) {
+    if (!descriptor) return;
+    Object.defineProperty(target, property, {
+      enumerable: descriptor.enumerable,
+      configurable: descriptor.configurable,
+      writable: descriptor.writable,
+      value: descriptor.initializer ? descriptor.initializer.call(context) : void 0
+    });
+  }
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+    var desc = {};
+    Object['ke' + 'ys'](descriptor).forEach(function (key) {
+      desc[key] = descriptor[key];
+    });
+    desc.enumerable = !!desc.enumerable;
+    desc.configurable = !!desc.configurable;
+
+    if ('value' in desc || desc.initializer) {
+      desc.writable = true;
+    }
+
+    desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+      return decorator(target, property, desc) || desc;
+    }, desc);
+
+    if (context && desc.initializer !== void 0) {
+      desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+      desc.initializer = undefined;
+    }
+
+    if (desc.initializer === void 0) {
+      Object['define' + 'Property'](target, property, desc);
+      desc = null;
+    }
+
+    return desc;
+  }
+
+  function _initializerWarningHelper(descriptor, context) {
+    throw new Error('Decorating class property failed. Please ensure that transform-class-properties is enabled.');
+  }
+
+  var _dec, _dec2, _dec3, _class, _desc, _value, _class2, _descriptor;
+
+  CKEDITOR.config.skin = 'bootstrapck';
+
+  var RichTextEditor = exports.RichTextEditor = (_dec = (0, _aureliaFramework.inject)(Element, _aureliaFramework.TaskQueue), _dec2 = (0, _aureliaFramework.noView)(), _dec3 = (0, _aureliaFramework.bindable)({ defaultBindingMode: _aureliaFramework.bindingMode.twoWay }), _dec(_class = _dec2(_class = (_class2 = function () {
+    function RichTextEditor(element, taskQueue) {
+      _classCallCheck(this, RichTextEditor);
+
+      _initDefineProp(this, 'value', _descriptor, this);
+
+      this.element = element;
+      this.taskQueue = taskQueue;
+      this.guard = false;
+    }
+
+    RichTextEditor.prototype.created = function created(owningView) {
+      var _this = this;
+
+      var original = owningView.removeNodes;
+      var that = this;
+
+      owningView.removeNodes = function () {
+        _this.editor.destroy();
+        original.call(owningView);
+      };
+    };
+
+    RichTextEditor.prototype.bind = function bind() {
+      var _this2 = this;
+
+      this.editor = CKEDITOR.appendTo(this.element, { removePlugins: 'resize, elementspath' }, this.value);
+
+      this.editor.on('change', function () {
+        var newValue = _this2.editor.getData();
+
+        if (_this2.value === newValue) {
+          return;
+        }
+
+        _this2.guard = true;
+
+        _this2.value = newValue;
+
+        _this2.taskQueue.queueMicroTask(function () {
+          return _this2.guard = false;
+        });
+      });
+    };
+
+    RichTextEditor.prototype.valueChanged = function valueChanged(newValue, oldValue) {
+      if (this.guard || !this.editor) {
+        return;
+      }
+
+      this.editor.setData(newValue);
+    };
+
+    return RichTextEditor;
+  }(), (_descriptor = _applyDecoratedDescriptor(_class2.prototype, 'value', [_dec3], {
+    enumerable: true,
+    initializer: null
+  })), _class2)) || _class) || _class);
+});
+define('tickets/tickets',['exports', 'backend/server', 'aurelia-framework'], function (exports, _server, _aureliaFramework) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.Tickets = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _dec, _class;
+
+  var Tickets = exports.Tickets = (_dec = (0, _aureliaFramework.inject)(_server.Server), _dec(_class = function () {
+    function Tickets(server) {
+      _classCallCheck(this, Tickets);
+
+      this.server = server;
+    }
+
+    Tickets.prototype.activate = function activate() {
+      var _this = this;
+
+      return this.server.getTicketSummaries().then(function (tickets) {
+        return _this.tickets = tickets;
+      });
+    };
+
+    return Tickets;
+  }()) || _class);
+});
+define('resources/elements/data-grid',['exports', 'aurelia-framework'], function (exports, _aureliaFramework) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.DataGrid = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _dec, _dec2, _class;
+
+  var DataGrid = exports.DataGrid = (_dec = (0, _aureliaFramework.inject)(Element), _dec2 = (0, _aureliaFramework.processContent)(parseColumns), _dec(_class = _dec2(_class = function () {
+    function DataGrid(element) {
+      var _this = this;
+
+      _classCallCheck(this, DataGrid);
+
+      this.element = element;
+      this.onResize = function () {
+        return _this.size();
+      };
+    }
+
+    DataGrid.prototype.bind = function bind() {
+      window.addEventListener('resize', this.onResize);
+    };
+
+    DataGrid.prototype.attached = function attached() {
+      this.headerCells = this.element.getElementsByClassName('header-row')[0].children;
+      this.sizingCells = this.element.getElementsByClassName('sizing-row')[0].children;
+      this.size();
+    };
+
+    DataGrid.prototype.unbind = function unbind() {
+      window.removeEventListener('resize', this.onResize);
+    };
+
+    DataGrid.prototype.size = function size() {
+      for (var i = 0, ii = this.headerCells.length - 1; i < ii; ++i) {
+        this.sizingCells[i].style.width = this.headerCells[i].offsetWidth + 'px';
+      }
+    };
+
+    return DataGrid;
+  }()) || _class) || _class);
+
+  function parseColumns(compiler, resources, node, instruction) {
+    var columns = node.querySelectorAll('grid-column');
+    var headerCells = '';
+    var dataCells = '';
+    var sizingCells = '';
+    var itemsExpression = node.getAttribute('items.bind');
+
+    node.removeAttribute('items.bind');
+
+    for (var i = 0, ii = columns.length; i < ii; ++i) {
+      var column = columns[i];
+      var cellTemplate = void 0;
+
+      headerCells += '<th>' + column.getAttribute('heading') + '</th>';
+      sizingCells += '<td></td>';
+
+      cellTemplate = column.innerHTML.trim();
+
+      if (cellTemplate) {
+        dataCells += '<td>' + cellTemplate + '</td>';
+      } else {
+        dataCells += '<td>${item.' + column.getAttribute('property') + '}</td>';
+      }
+    }
+
+    node.innerHTML = '\n  <table class="grid-header table">\n    <thead>\n      <tr class="header-row">' + headerCells + '</tr>\n    </thead>\n  </table>\n  <div class="grid-container">\n    <table class="grid-rows table table-striped">\n      <tbody>\n        <tr class="sizing-row">' + sizingCells + '</tr>\n        <tr repeat.for="item of ' + itemsExpression + '" class="item-row">' + dataCells + '</tr>\n      </tbody>\n    </table>\n  </div>\n  ';
+
+    return true;
+  }
+});
+define('settings/index',['exports', './routes'], function (exports, _routes2) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.CategoriesValueConverter = exports.SettingsIndex = undefined;
+
+  var _routes3 = _interopRequireDefault(_routes2);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var SettingsIndex = exports.SettingsIndex = function () {
+    function SettingsIndex() {
+      _classCallCheck(this, SettingsIndex);
+    }
+
+    SettingsIndex.prototype.configureRouter = function configureRouter(config, router) {
+      this.router = router;
+      config.map(_routes3.default);
+    };
+
+    return SettingsIndex;
+  }();
+
+  var CategoriesValueConverter = exports.CategoriesValueConverter = function () {
+    function CategoriesValueConverter() {
+      _classCallCheck(this, CategoriesValueConverter);
+    }
+
+    CategoriesValueConverter.prototype.toView = function toView(navModels) {
+      var categories = new Map();
+
+      for (var _iterator = navModels, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+        var _ref;
+
+        if (_isArray) {
+          if (_i >= _iterator.length) break;
+          _ref = _iterator[_i++];
+        } else {
+          _i = _iterator.next();
+          if (_i.done) break;
+          _ref = _i.value;
+        }
+
+        var model = _ref;
+
+        var _routes = categories.get(model.settings.category);
+
+        if (!_routes) {
+          categories.set(model.settings.category, _routes = []);
+        }
+
+        _routes.push(model);
+      }
+
+      return categories;
+    };
+
+    return CategoriesValueConverter;
+  }();
+});
+define('settings/routes',['exports'], function (exports) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  var adminHome = {
+    title: 'Admin Home',
+    iconClass: 'fa-home'
+  };
+
+  var channels = {
+    title: 'Channels',
+    iconClass: 'fa-external-link'
+  };
+
+  var settings = {
+    title: 'Settings',
+    iconClass: 'fa-cog'
+  };
+
+  exports.default = [{ route: '', moduleId: './overview/index', title: 'Overview', nav: true, settings: { category: adminHome } }, { route: 'email', moduleId: './email/index', title: 'Email', nav: true, settings: { category: channels } }, { route: 'web-portal', moduleId: './webportal/index', title: 'Web Portal', nav: true, settings: { category: channels } }, { route: 'twitter', moduleId: './twitter/index', title: 'Twitter', nav: true, settings: { category: channels } }, { route: 'facebook', moduleId: './facebook/index', title: 'Facebook', nav: true, settings: { category: channels } }, { route: 'feedback-tab', moduleId: './feedbacktab/index', title: 'Feedback Tab', nav: true, settings: { category: channels } }, { route: 'api', moduleId: './api/index', title: 'API', nav: true, settings: { category: channels } }, { route: 'account', moduleId: './account/index', title: 'Account', nav: true, settings: { category: settings } }, { route: 'subscription', moduleId: './subscription/index', title: 'Subscription', nav: true, settings: { category: channels } }, { route: 'security', moduleId: './security/index', title: 'Security', nav: true, settings: { category: settings } }];
+});
+define('settings/account/index',['exports'], function (exports) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var Index = exports.Index = function Index() {
+    _classCallCheck(this, Index);
+
+    this.heading = 'Account';
+  };
+});
+define('settings/email/index',['exports'], function (exports) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var Index = exports.Index = function Index() {
+    _classCallCheck(this, Index);
+
+    this.heading = 'Email';
+  };
+});
+define('settings/api/index',['exports'], function (exports) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var Index = exports.Index = function Index() {
+    _classCallCheck(this, Index);
+
+    this.heading = 'API';
+  };
+});
+define('settings/facebook/index',['exports'], function (exports) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var Index = exports.Index = function Index() {
+    _classCallCheck(this, Index);
+
+    this.heading = 'Facebook';
+  };
+});
+define('settings/feedbacktab/index',['exports'], function (exports) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var Index = exports.Index = function Index() {
+    _classCallCheck(this, Index);
+
+    this.heading = 'Feedback Tab';
+  };
+});
+define('settings/overview/index',['exports'], function (exports) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var Index = exports.Index = function Index() {
+    _classCallCheck(this, Index);
+
+    this.heading = 'Overview';
+  };
+});
+define('settings/security/index',['exports'], function (exports) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var Index = exports.Index = function Index() {
+    _classCallCheck(this, Index);
+
+    this.heading = 'Security';
+  };
+});
+define('settings/subscription/index',['exports'], function (exports) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var Index = exports.Index = function Index() {
+    _classCallCheck(this, Index);
+
+    this.heading = 'Subscription';
+  };
+});
+define('settings/twitter/index',['exports'], function (exports) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var Index = exports.Index = function Index() {
+    _classCallCheck(this, Index);
+
+    this.heading = 'Twitter';
+  };
+});
+define('settings/webportal/index',['exports'], function (exports) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var Index = exports.Index = function Index() {
+    _classCallCheck(this, Index);
+
+    this.heading = 'Web Portal';
+  };
+});
+define('text!login/login.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"login\">\r\n    <div class=\"row\">\r\n      <div class=\"col-md-4 col-md-offset-4 logo\"></div>\r\n    </div>\r\n    <div class=\"row\">\r\n      <div class=\"col-md-4 col-md-offset-4 well\">\r\n        <div show.bind=\"message\" class=\"alert alert-danger\">${message}</div>\r\n\r\n        <form role=\"form\" submit.trigger=\"login()\" class=\"form-horizontal\">\r\n          <div class=\"form-group\">\r\n            <label class=\"col-sm-2 control-label\">Username</label>\r\n            <div class=\"col-sm-10\">\r\n              <input type=\"text\" value.bind=\"username\" class=\"form-control\" placeholder=\"username\"><!--Bind the username.-->\r\n            </div>\r\n          </div>\r\n          <div class=\"form-group\">\r\n            <label class=\"col-sm-2 control-label\">Password</label>\r\n            <div class=\"col-sm-10\">\r\n              <input type=\"password\" value.bind=\"password\" class=\"form-control\" placeholder=\"password\"><!--Bind the password.-->\r\n            </div>\r\n          </div>\r\n          <div class=\"form-group\">\r\n            <div class=\"col-sm-offset-2 col-sm-10 text-right\">\r\n              <!--Disable the button if there isn't both a username and password.-->\r\n              <button disabled.bind=\"!username || !password\" type=\"submit\" class=\"btn btn-success\">Log In</button>\r\n            </div>\r\n          </div>\r\n        </form>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</template>\r\n"; });
+define('text!home/activity-list.html', ['module'], function(module) { module.exports = "<template bindable=\"activity\">\r\n  <ul>\r\n    <li repeat.for=\"a of activity\" class=\"activity\">\r\n      <a route-href=\"route.bind: a.type | activityTypeToRoute; params.bind: { id: a.associatedId }\">\r\n        <div class=\"well\">\r\n          <div class=\"avatar\">\r\n            <img src=\"${a.createdBy.iconUrl}\">\r\n          </div>\r\n          <div class=\"body\">\r\n            <div class=\"title\" innerhtml.bind=\"a.title\"></div>\r\n            <div class=\"content\">${a.content}</div>\r\n            <div class=\"date\">${a.createdAt | date}</div>\r\n          </div>\r\n        </div>\r\n      </a>\r\n    </li>\r\n  </ul>\r\n</template>\r\n"; });
+define('text!home/home.html', ['module'], function(module) { module.exports = "<template>\r\n  <require from=\"./activity-list.html\"></require>\r\n  <require from=\"./news-list.html\"></require>\r\n\r\n  <div>\r\n    <div class=\"header\">\r\n      <div class=\"header-left\">Activity</div>\r\n      <div class=\"header-right\">Benchmarks &amp; News</div>\r\n    </div>\r\n\r\n    <div class=\"sidebar\">\r\n      <activity-list activity.bind=\"activity\"></activity-list>\r\n    </div>\r\n\r\n    <div class=\"detail-container\">\r\n      <div class=\"row1x2\">\r\n        <!--TODO: Add Charts Here-->\r\n      </div>\r\n      <div class=\"row2x2\">\r\n        <news-list news.bind=\"news\"></news-list>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</template>\r\n"; });
+define('text!home/news-list.html', ['module'], function(module) { module.exports = "<template bindable=\"news\" class=\"news\">\r\n\r\n  <!--One of these for each item in the news array.-->\r\n  <template repeat.for=\"item of news\">\r\n    <h1>${item.title}</h1>\r\n    <p>${item.content}</p>\r\n    <div>\r\n      <span class=\"badge badge-success\">${item.createdAt | date}</span>\r\n      <div class=\"pull-right\">\r\n        <span repeat.for=\"tag of item.tags\" class=\"badge\">${tag}</span>\r\n      </div>\r\n    </div>\r\n    <hr>\r\n  </template>\r\n</template>\r\n"; });
+define('text!shell/header.html', ['module'], function(module) { module.exports = "<template>\r\n  <nav class=\"navbar navbar-default navbar-fixed-top\" role=\"navigation\">\r\n    <ul class=\"nav navbar-nav tabs\">\r\n\r\n      <li repeat.for=\"tab of tabs\" class=\"${tab.isActive ? 'active' : ''}\">\r\n        <a route-href=\"route.bind: tab.route; params.bind: tab.params\">${tab.title}</a>\r\n        <a href=\"#\" click.trigger=\"closeTab(tab)\">\r\n          <i class=\"fa fa-times\"></i>\r\n        </a>\r\n      </li>\r\n\r\n      <li class=\"dropdown add\">\r\n        <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">\r\n          <i class=\"fa fa-plus\"></i>add\r\n        </a>\r\n        <ul class=\"dropdown-menu\">\r\n          <li>\r\n            <a route-href=\"route: thread; params.bind: { id:'new' }\"><i class=\"icon-ticket\"></i> New Ticket</a>\r\n          </li>\r\n          <li>\r\n            <a route-href=\"route: user; params.bind: { id:'new' }\"><i class=\"icon-group\"></i> New User</a>\r\n          </li>\r\n        </ul>\r\n      </li>\r\n    </ul>\r\n\r\n    <ul class=\"nav navbar-nav navbar-right\">\r\n      <li class=\"dropdown\">\r\n        <a href=\"#\" class=\"avatar dropdown-toggle\" data-toggle=\"dropdown\">\r\n          <img src=\"${user.iconUrl}\" title.bind=\"user.username\">\r\n          <b class=\"caret\"></b>\r\n        </a>\r\n        <ul class=\"dropdown-menu\" role=\"menu\">\r\n          <li role=\"presentation\">\r\n            <a route-href=\"route: settings\"><i class=\"fa fa-cog\"></i> Settings</a>\r\n          </li>\r\n          <li role=\"presentation\">\r\n            <a route-href=\"route: help\"><i class=\"fa fa-envelope\"></i> Help</a>\r\n          </li>\r\n          <li role=\"presentation\" class=\"divider\"></li>\r\n          <li role=\"presentation\">\r\n            <a href=\"#\" click.trigger=\"logout()\"><i class=\"fa fa-power-off\"></i> Logout</a>\r\n          </li>\r\n        </ul>\r\n      </li>\r\n    </ul>\r\n  </nav>\r\n</template>\r\n"; });
+define('text!shell/shell.html', ['module'], function(module) { module.exports = "<template>\r\n  <compose view=\"./header.html\"></compose>\r\n  <compose view=\"./sidebar.html\"></compose>\r\n\r\n  <div class=\"page-host\">\r\n    <router-view></router-view>\r\n  </div>\r\n</template>\r\n"; });
+define('text!shell/sidebar.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"main-nav\">\r\n    <ul class=\"nav nav-list\">\r\n      <li repeat.for=\"route of router.navigation\" class=\"${route.isActive ? 'active' : ''}\">\r\n        <a href.bind=\"route.href\" title.bind=\"route.title\">\r\n          <i class=\"fa ${route.settings.iconClass}\"></i>\r\n        </a>\r\n      </li>\r\n    </ul>\r\n  </div>\r\n</template>\r\n"; });
+define('text!tickets/thread.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"ticket\">\r\n    <div class=\"header\">\r\n      <div class=\"btn-group\">\r\n        <a class=\"btn btn-default creator\" route-href=\"route: user; params.bind: { id:ticket.participants[0].id}\" class=\"btn\">\r\n          <span>${ticket.participants[0].username}</span>\r\n        </a>\r\n        <button class=\"btn status active\">\r\n          <span class=\"badge ${ticket.status}\">${ticket.status}</span>\r\n        </button>\r\n      </div>\r\n    </div>\r\n\r\n    <div class=\"sidebar\">\r\n      <div class=\"well\">\r\n        <form>\r\n          <div class=\"form-group\">\r\n            <label class=\"control-label\">Type</label>\r\n            <select class=\"form-control\">\r\n              <option>Question</option>\r\n              <option>Incident</option>\r\n              <option>Problem</option>\r\n              <option>Task</option>\r\n            </select>\r\n          </div>\r\n          <div class=\"form-group\">\r\n            <label class=\"control-label\">Priority</label>\r\n            <select class=\"form-control\">\r\n              <option>Low</option>\r\n              <option>Normal</option>\r\n              <option>High</option>\r\n              <option>Urgent</option>\r\n            </select>\r\n          </div>\r\n          <div class=\"form-group\">\r\n            <label class=\"control-label\">Tags</label>\r\n            <input class=\"form-control\" type=\"text\" placeholder=\"tags\" />\r\n          </div>\r\n        </form>\r\n      </div>\r\n      <div class=\"well\">\r\n        <form>\r\n          <div class=\"form-group\">\r\n            <label class=\"control-label\">Internal Notes</label>\r\n            <textarea class=\"form-control\"></textarea>\r\n          </div>\r\n        </form>\r\n      </div>\r\n    </div>\r\n\r\n    <div class=\"detail-container\">\r\n      <div class=\"header\">\r\n        <i class=\"fa fa-comments\"></i>\r\n        <div class=\"content\">\r\n          <div class=\"title\">${ticket.title}</div>\r\n          <div class=\"description\">\r\n            <span>${ticket.createdAt | date}</span>\r\n            <i class=\"fa fa-circle separator\"></i>\r\n            <span>${from.firstName} ${from.lastName}</span> &lt;\r\n            <span>${from.email}</span>&gt;\r\n          </div>\r\n        </div>\r\n      </div>\r\n\r\n      <div class=\"thread\">\r\n        <form class=\"message\">\r\n          <rich-text-editor value.bind=\"message\"></rich-text-editor>\r\n        </form>\r\n\r\n        <div class=\"btn-group dropup pull-right\">\r\n          <button click.trigger=\"submit('Solved')\" class=\"btn btn-success\">Submit as Solved</button>\r\n          <button class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\">\r\n            <span class=\"caret\"></span>\r\n          </button>\r\n          <ul class=\"dropdown-menu\">\r\n            <li>\r\n              <a href=\"#\" click.trigger=\"submit('Open')\">Submit as Open</a>\r\n              <a href=\"#\" click.trigger=\"submit('Pending')\">Submit as Pending</a>\r\n              <a href=\"#\" click.trigger=\"submit('Solved')\">Submit as Solved</a>\r\n            </li>\r\n          </ul>\r\n        </div>\r\n\r\n        <div class=\"post-list\">\r\n          <div repeat.for=\"post of ticket.posts\" class=\"post\">\r\n            <input type=\"hidden\" model.one-time=\"getParticipant(post.fromId)\" ref=\"participant\">\r\n            <div class=\"avatar\">\r\n              <img src=\"${participant.model.avatarUrl}\">\r\n            </div>\r\n            <div class=\"body\">\r\n              <div>\r\n                <strong>${participant.model.firstName}</strong>\r\n                <strong>${participant.model.lastName}</strong>\r\n                <span class=\"createdAt\">${post.createdAt | date}</span>\r\n              </div>\r\n              <div>\r\n                <div>\r\n                  <p innerhtml.bind=\"post.content\"></p>\r\n                </div>\r\n              </div>\r\n            </div>\r\n          </div>\r\n        </div>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</template>\r\n"; });
+define('text!resources/dialogs/message-box.html', ['module'], function(module) { module.exports = "<template>\r\n  <ai-dialog style=\"max-width: 325px\">\r\n    <ai-dialog-header>${model.title}</ai-dialog-header>\r\n\r\n    <ai-dialog-body>\r\n      ${model.message}\r\n    </ai-dialog-body>\r\n\r\n    <ai-dialog-footer>\r\n      <button repeat.for=\"option of model.options\" click.trigger=\"selectOption(option)\">${option}</button>\r\n    </ai-dialog-footer>\r\n  </ai-dialog>\r\n</template>"; });
+define('text!resources/dialogs/prompt.html', ['module'], function(module) { module.exports = "<template>\r\n  <ai-dialog>\r\n    <ai-dialog-header>${model.title}</ai-dialog-header>\r\n\r\n    <ai-dialog-body>\r\n      <p>${model.message}</p>\r\n      <form submit.delegate=\"ok()\">\r\n        <input value.bind=\"answer\" type=\"text\" class=\"form-control\" attach-focus=\"true\">\r\n      </form>\r\n    </ai-dialog-body>\r\n\r\n    <ai-dialog-footer>\r\n      <button click.trigger=\"cancel()\">Cancel</button>\r\n      <button disabled.bind=\"!answer\" click.trigger=\"ok()\">Ok</button>\r\n    </ai-dialog-footer>\r\n  </ai-dialog>\r\n</template>\r\n"; });
+define('text!tickets/tickets.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"header\">\r\n    <div class=\"header-single\">Tickets</div>\r\n  </div>\r\n\r\n  <data-grid items.bind=\"tickets\">\r\n    <grid-column heading=\"Title\">\r\n      <a route-href=\"route: thread; params.bind: { id:item.id }\">${item.title}</a>\r\n    </grid-column>\r\n    <grid-column heading=\"Submitted By\">\r\n      ${item.participants[0].firstName} ${item.participants[0].lastName}\r\n    </grid-column>\r\n    <grid-column heading=\"Submitted On\">\r\n      ${item.createdAt | date}\r\n    </grid-column>\r\n    <grid-column heading=\"Type\" property=\"type\"></grid-column>\r\n    <grid-column heading=\"Status\" property=\"status\"></grid-column>\r\n    <grid-column heading=\"Priority\" property=\"priority\"></grid-column>\r\n  </data-grid>\r\n</template>"; });
+define('text!resources/elements/data-grid.html', ['module'], function(module) { module.exports = "<template>\r\n  <slot></slot>\r\n</template>\r\n"; });
+define('text!settings/index.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"header\">\r\n    <div class=\"header-left\">Settings</div>\r\n    <div class=\"header-right\"></div>\r\n  </div>\r\n\r\n  <div class=\"sidebar\">\r\n    <ul class=\"nav nav-pills nav-stacked\">\r\n      <template repeat.for=\"[category, routes] of router.navigation | categories\">\r\n        <li class=\"nav-header\">\r\n          <i class=\"fa\" class.bind=\"category.iconClass\"></i>\r\n          <span>${category.title}</span>\r\n        </li>\r\n        \r\n        <li repeat.for=\"nav of routes\" class=\"${nav.isActive ? 'active' : ''}\">\r\n          <a href.bind=\"nav.href\">${nav.title}</a>\r\n        </li>\r\n      </template>\r\n    </ul>\r\n  </div>\r\n\r\n  <div class=\"detail-container settings-container\">\r\n    <router-view></router-view>\r\n  </div>\r\n</template>"; });
+define('text!settings/account/index.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"header\">\r\n    <div class=\"content\">\r\n      <div class=\"title\">${heading}</div>\r\n    </div>\r\n  </div>\r\n  <div class=\"grid-container container-fluid\">\r\n    <div class=\"row-fluid\">\r\n      <div class=\"alert alert-danger text-center\">\r\n        <span>${heading} Settings Not Implemented</span>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</template>"; });
+define('text!settings/email/index.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"header\">\r\n    <div class=\"content\">\r\n      <div class=\"title\">${heading}</div>\r\n    </div>\r\n  </div>\r\n  <div class=\"grid-container container-fluid\">\r\n    <div class=\"row-fluid\">\r\n      <div class=\"alert alert-danger text-center\">\r\n        <span>${heading} Settings Not Implemented</span>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</template>"; });
+define('text!settings/feedbacktab/index.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"header\">\r\n    <div class=\"content\">\r\n      <div class=\"title\">${heading}</div>\r\n    </div>\r\n  </div>\r\n  <div class=\"grid-container container-fluid\">\r\n    <div class=\"row-fluid\">\r\n      <div class=\"alert alert-danger text-center\">\r\n        <span>${heading} Settings Not Implemented</span>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</template>"; });
+define('text!settings/overview/index.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"header\">\r\n    <div class=\"content\">\r\n      <div class=\"title\">${heading}</div>\r\n    </div>\r\n  </div>\r\n  <div class=\"grid-container container-fluid\">\r\n    <div class=\"row-fluid\">\r\n      <div class=\"alert alert-danger text-center\">\r\n        <span>${heading} Settings Not Implemented</span>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</template>"; });
+define('text!settings/api/index.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"header\">\r\n    <div class=\"content\">\r\n      <div class=\"title\">${heading}</div>\r\n    </div>\r\n  </div>\r\n  <div class=\"grid-container container-fluid\">\r\n    <div class=\"row-fluid\">\r\n      <div class=\"alert alert-danger text-center\">\r\n        <span>${heading} Settings Not Implemented</span>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</template>"; });
+define('text!settings/facebook/index.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"header\">\r\n    <div class=\"content\">\r\n      <div class=\"title\">${heading}</div>\r\n    </div>\r\n  </div>\r\n  <div class=\"grid-container container-fluid\">\r\n    <div class=\"row-fluid\">\r\n      <div class=\"alert alert-danger text-center\">\r\n        <span>${heading} Settings Not Implemented</span>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</template>"; });
+define('text!settings/subscription/index.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"header\">\r\n    <div class=\"content\">\r\n      <div class=\"title\">${heading}</div>\r\n    </div>\r\n  </div>\r\n  <div class=\"grid-container container-fluid\">\r\n    <div class=\"row-fluid\">\r\n      <div class=\"alert alert-danger text-center\">\r\n        <span>${heading} Settings Not Implemented</span>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</template>"; });
+define('text!settings/security/index.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"header\">\r\n    <div class=\"content\">\r\n      <div class=\"title\">${heading}</div>\r\n    </div>\r\n  </div>\r\n  <div class=\"grid-container container-fluid\">\r\n    <div class=\"row-fluid\">\r\n      <div class=\"alert alert-danger text-center\">\r\n        <span>${heading} Settings Not Implemented</span>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</template>"; });
+define('text!settings/twitter/index.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"header\">\r\n    <div class=\"content\">\r\n      <div class=\"title\">${heading}</div>\r\n    </div>\r\n  </div>\r\n  <div class=\"grid-container container-fluid\">\r\n    <div class=\"row-fluid\">\r\n      <div class=\"alert alert-danger text-center\">\r\n        <span>${heading} Settings Not Implemented</span>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</template>"; });
+define('text!settings/webportal/index.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"header\">\r\n    <div class=\"content\">\r\n      <div class=\"title\">${heading}</div>\r\n    </div>\r\n  </div>\r\n  <div class=\"grid-container container-fluid\">\r\n    <div class=\"row-fluid\">\r\n      <div class=\"alert alert-danger text-center\">\r\n        <span>${heading} Settings Not Implemented</span>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</template>"; });
 //# sourceMappingURL=app-bundle.js.map

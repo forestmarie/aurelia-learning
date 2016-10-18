@@ -16,15 +16,17 @@ export class Thread {
   }
 
   getParticipant(id) {
-    return this.ticket.participants.find(x => x.id == id);
+    return this.ticket.participants.find(x => x.id === id);
   }
 
   save() {
-    var isNew = this.ticket.id == 0;
+    let isNew = this.ticket.id === 0;
     this.server.saveTicket(this.ticket).then(ticket => {
       this.ticket = ticket;
 
       if (isNew) {
+        // We do not need to trigger the activation lifecycle here.  Further, we need to replace
+        //the history item in the router and change the url - that's what replace: true does.
         this.router.navigateToRoute('thread', {id: ticket.id}, { replace: true, trigger: false });
         this.eventAggregator.publish(new TabOpened(ticket.title, 'thread', { id: ticket.id }));
       }
@@ -51,7 +53,7 @@ export class Thread {
   }
 
   canActivate(params) {
-    if (params.id == 'new') {
+    if (params.id === 'new') {
       if (params.title) {
         this.ticket = this.server.createTicket(params.title);
         this.from = this.getParticipant(this.ticket.fromId);
@@ -62,12 +64,12 @@ export class Thread {
         if (response.wasCancelled) {
           return false;
         }
-        
-        return new RedirectToRoute('thread', { id: 'new', title:  response.output});
+
+        return new RedirectToRoute('thread', { id: 'new', title: response.output});
       });
     }
 
-    return this.server.getTicketDetails(parseInt(params.id)).then(ticket => {
+    return this.server.getTicketDetails(parseInt(params.id, 10)).then(ticket => {
       if (ticket) {
         this.ticket = ticket;
         this.from = this.getParticipant(ticket.fromId);
@@ -85,7 +87,7 @@ export class Thread {
 
   canDeactivate() {
     if (this.ticket.id === 0) {
-      let message = 'You have created a ticket but have not yet posted it with a status. If you leave now, your work will be lost. Do you wish to continue?'
+      let message = 'You have created a ticket but have not yet posted it with a status. If you leave now, your work will be lost. Do you wish to continue?';
 
       return this.commonDialogs.showMessage(
         message,

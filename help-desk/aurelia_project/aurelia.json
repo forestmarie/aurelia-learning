@@ -140,6 +140,11 @@
             "name": "aurelia-dialog",
             "path": "../node_modules/aurelia-dialog/dist/amd",
             "main": "aurelia-dialog"
+          },
+          {
+            "name": "chartjs",
+            "path": "../node_modules/chart.js/Chart.min",
+            "exports": "Chart"
           }
         ]
       }

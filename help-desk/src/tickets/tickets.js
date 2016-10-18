@@ -6,7 +6,7 @@ export class Tickets {
   constructor(server) {
     this.server = server;
   }
-  
+
   activate() {
     return this.server.getTicketSummaries().then(tickets => this.tickets = tickets);
   }
